@@ -29,3 +29,5 @@ build/
 ### Logs ###
 logs/
 *.log
+build_errors.txt
+build_log.txt
