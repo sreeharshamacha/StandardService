@@ -1,0 +1,159 @@
+server:
+  port: 8080
+  error:
+    include-message: always
+    include-stacktrace: never
+
+spring:
+  profiles:
+    active: dev
+  application:
+    name: StandardService
+  
+  datasource:
+    url: jdbc:mysql://localhost:3306/standard_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: root
+    password: password
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      idle-timeout: 300000
+      connection-timeout: 20000
+      max-lifetime: 1200000
+      pool-name: StandardHikariCP
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: true
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: ""
+      timeout: 2000ms
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8081/auth/realms/standard
+      client:
+        registration:
+          standard-client:
+            client-id: standard-service
+            client-secret: secret
+            authorization-grant-type: client_credentials
+            scope: read,write
+        provider:
+          standard-client:
+            token-uri: http://localhost:8081/auth/realms/standard/protocol/openid-connect/token
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+    prometheus:
+      enabled: true
+  
+  otlp:
+    tracing:
+      endpoint: http://localhost:4318/v1/traces
+  
+  tracing:
+    sampling:
+      probability: 1.0
+  
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+
+# Resilience4j Config
+resilience4j:
+  circuitbreaker:
+    instances:
+      mainService:
+        registerHealthIndicator: true
+        slidingWindowSize: 10
+        permittedNumberOfCallsInHalfOpenState: 3
+        slidingWindowType: COUNT_BASED
+        minimumNumberOfCalls: 5
+        waitDurationInOpenState: 5000
+        failureRateThreshold: 50
+        eventConsumerBufferSize: 10
+      userService:
+        registerHealthIndicator: true
+        slidingWindowSize: 20
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+  ratelimiter:
+    instances:
+      mainService:
+        registerHealthIndicator: false
+        limitForPeriod: 10
+        limitRefreshPeriod: 1s
+        timeoutDuration: 0
+      userService:
+        limitForPeriod: 5
+        limitRefreshPeriod: 1s
+        timeoutDuration: 500ms
+  retry:
+    instances:
+      mainService:
+        maxAttempts: 3
+        waitDuration: 2s
+        enableExponentialBackoff: true
+        exponentialBackoffMultiplier: 2
+      userService:
+        maxAttempts: 3
+        waitDuration: 1s
+  bulkhead:
+    instances:
+      mainService:
+        maxConcurrentCalls: 5
+        maxWaitDuration: 0
+      userService:
+        maxConcurrentCalls: 10
+        maxWaitDuration: 2s
+  timelimiter:
+    instances:
+      mainService:
+        timeoutDuration: 2s
+        cancelRunningFuture: true
+      userService:
+        timeoutDuration: 3s
+        cancelRunningFuture: true
+
+# Swagger Config
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: alpha
+
+logging:
+  config: classpath:log4j2.xml
+
+app:
+  async:
+    core-pool-size: 5
+    max-pool-size: 10
+    queue-capacity: 500
+    thread-name-prefix: StandardService-Async-
+  cors:
+    allowed-origins: "*"
+    allowed-methods: GET,POST,PUT,DELETE,OPTIONS,PATCH
+    allowed-headers: "*"
+    max-age: 3600

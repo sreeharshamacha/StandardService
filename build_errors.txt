@@ -1,0 +1,22 @@
+﻿[INFO] Scanning for projects...
+[INFO] 
+[INFO] --------------------< com.standard:StandardService >--------------------
+[INFO] Building StandardService 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ StandardService ---
+[INFO] Copying 2 resources from src\main\resources to target\classes
+[INFO] Copying 2 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ StandardService ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 40 source files with javac [debug parameters release 17] to target\classes
+[WARNING] /C:/WorkspaceCCLM/StandardService/src/main/java/com/standard/service/config/Resilience4jConfig.java:[31,23] setConnectTimeout(java.time.Duration) in org.springframework.boot.web.client.RestTemplateBuilder has been deprecated and marked for removal
+[WARNING] /C:/WorkspaceCCLM/StandardService/src/main/java/com/standard/service/config/Resilience4jConfig.java:[31,64] setReadTimeout(java.time.Duration) in org.springframework.boot.web.client.RestTemplateBuilder has been deprecated and marked for removal
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  7.230 s
+[INFO] Finished at: 2026-02-01T18:40:32+05:30
+[INFO] ------------------------------------------------------------------------
