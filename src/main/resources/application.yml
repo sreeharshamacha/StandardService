@@ -151,6 +151,13 @@ springdoc:
 logging:
   config: classpath:log4j2.xml
 
+pii:
+  encryption-key: ${PII_SECRET_KEY:ThisIsA32ByteLongSecureKey123456}
+  entities:
+    com.standard.service.entity.UserEntity: 
+      - email
+      - nationalId
+
 app:
   async:
     core-pool-size: 5
