@@ -31,66 +31,62 @@ import java.time.Duration;
 @RequiredArgsConstructor
 public class RedisCacheConfig implements CachingConfigurer {
 
-    private final RedisConnectionFactory redisConnectionFactory;
+        private final RedisConnectionFactory redisConnectionFactory;
 
-    @Bean
-    public RedisTemplate<String, Object> redisTemplate() {
-        RedisTemplate<String, Object> template = new RedisTemplate<>();
-        template.setConnectionFactory(redisConnectionFactory);
+        @Bean
+        public RedisTemplate<String, Object> redisTemplate() {
+                RedisTemplate<String, Object> template = new RedisTemplate<>();
+                template.setConnectionFactory(redisConnectionFactory);
 
-        StringRedisSerializer stringSerializer = new StringRedisSerializer();
-        GenericJackson2JsonRedisSerializer jsonSerializer = new GenericJackson2JsonRedisSerializer(objectMapper());
+                StringRedisSerializer stringSerializer = new StringRedisSerializer();
+                GenericJackson2JsonRedisSerializer jsonSerializer = new GenericJackson2JsonRedisSerializer(
+                                objectMapper());
 
-        template.setKeySerializer(stringSerializer);
-        template.setHashKeySerializer(stringSerializer);
-        template.setValueSerializer(jsonSerializer);
-        template.setHashValueSerializer(jsonSerializer);
+                template.setKeySerializer(stringSerializer);
+                template.setHashKeySerializer(stringSerializer);
+                template.setValueSerializer(jsonSerializer);
+                template.setHashValueSerializer(jsonSerializer);
 
-        template.afterPropertiesSet();
-        return template;
-    }
+                template.afterPropertiesSet();
+                return template;
+        }
 
-    @Override
-    @Bean
-    @Primary
-    public CacheManager cacheManager() {
-        return RedisCacheManager.builder(redisConnectionFactory)
-                .cacheDefaults(cacheConfiguration())
-                .build();
-    }
+        @Override
+        @Bean
+        @Primary
+        public CacheManager cacheManager() {
+                return RedisCacheManager.builder(redisConnectionFactory).cacheDefaults(cacheConfiguration()).build();
+        }
 
-    @Bean
-    public RedisCacheConfiguration cacheConfiguration() {
-        return RedisCacheConfiguration.defaultCacheConfig()
-                .entryTtl(Duration.ofMinutes(10))
-                .disableCachingNullValues()
-                .serializeKeysWith(
-                        RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
-                .serializeValuesWith(
-                        RedisSerializationContext.SerializationPair.fromSerializer(
-                                new GenericJackson2JsonRedisSerializer(objectMapper())));
-    }
+        @Bean
+        public RedisCacheConfiguration cacheConfiguration() {
+                return RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofMinutes(10))
+                                .disableCachingNullValues()
+                                .serializeKeysWith(RedisSerializationContext.SerializationPair
+                                                .fromSerializer(new StringRedisSerializer()))
+                                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(
+                                                new GenericJackson2JsonRedisSerializer(objectMapper())));
+        }
 
-    @Bean
-    public RedisCacheManagerBuilderCustomizer redisCacheManagerBuilderCustomizer() {
-        return builder -> builder
-                .withCacheConfiguration(AppConstants.CACHE_USERS,
-                        RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofMinutes(5)))
-                .withCacheConfiguration(AppConstants.CACHE_PRODUCTS,
-                        RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofMinutes(30)))
-                .withCacheConfiguration(AppConstants.CACHE_SETTINGS,
-                        RedisCacheConfiguration.defaultCacheConfig().entryTtl(Duration.ofHours(1)));
-    }
+        @Bean
+        public RedisCacheManagerBuilderCustomizer redisCacheManagerBuilderCustomizer() {
+                return builder -> builder
+                                .withCacheConfiguration(AppConstants.CACHE_USERS,
+                                                RedisCacheConfiguration.defaultCacheConfig()
+                                                                .entryTtl(Duration.ofMinutes(5)))
+                                .withCacheConfiguration(AppConstants.CACHE_PRODUCTS,
+                                                RedisCacheConfiguration.defaultCacheConfig()
+                                                                .entryTtl(Duration.ofMinutes(30)))
+                                .withCacheConfiguration(AppConstants.CACHE_SETTINGS, RedisCacheConfiguration
+                                                .defaultCacheConfig().entryTtl(Duration.ofHours(1)));
+        }
 
-    private ObjectMapper objectMapper() {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(new JavaTimeModule());
-        mapper.activateDefaultTyping(
-                BasicPolymorphicTypeValidator.builder()
-                        .allowIfBaseType(Object.class)
-                        .build(),
-                ObjectMapper.DefaultTyping.NON_FINAL,
-                JsonTypeInfo.As.PROPERTY);
-        return mapper;
-    }
+        private ObjectMapper objectMapper() {
+                ObjectMapper mapper = new ObjectMapper();
+                mapper.registerModule(new JavaTimeModule());
+                mapper.activateDefaultTyping(
+                                BasicPolymorphicTypeValidator.builder().allowIfBaseType(Object.class).build(),
+                                ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.PROPERTY);
+                return mapper;
+        }
 }

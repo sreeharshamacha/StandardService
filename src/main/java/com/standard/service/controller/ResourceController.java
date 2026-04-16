@@ -44,10 +44,10 @@ public class ResourceController {
     }
 
     @GetMapping
-    @Operation(summary = "Get all resources")
-    public ResponseEntity<ApiResponse<List<ResourceResponse>>> getAllResources() {
-        log.info("REST request to get all resources");
-        List<ResourceResponse> response = resourceService.getAllResources();
+    @Operation(summary = "Get all resources with pagination")
+    public ResponseEntity<ApiResponse<PaginatedResponse<ResourceResponse>>> getAllResources(PaginationRequest request) {
+        log.info("REST request to get all resources with pagination: {}", request);
+        PaginatedResponse<ResourceResponse> response = resourceService.searchResources(request);
         return ResponseEntity.ok(ApiResponse.success(response, MdcUtils.getTraceId()));
     }
 

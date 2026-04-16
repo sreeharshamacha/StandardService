@@ -14,24 +14,19 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/actuator/**",
-                                "/swagger-ui/**",
-                                "/swagger-ui.html",
-                                "/v3/api-docs/**",
-                                "/api-docs/**")
-                        .permitAll()
-                        .requestMatchers("/api/v1/health/**").permitAll()
-                        .anyRequest().authenticated())
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> {
-                }));
+        @Bean
+        public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+                http.csrf(AbstractHttpConfigurer::disable).sessionManagement(
+                                session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                                .authorizeHttpRequests(auth -> auth
+                                                .requestMatchers("/actuator/**", "/swagger-ui/**", "/swagger-ui.html",
+                                                                "/v3/api-docs/**", "/api-docs/**")
+                                                .permitAll().requestMatchers("/api/v1/health/**").permitAll()
+                                                // .anyRequest().authenticated())
+                                                .anyRequest().permitAll())
+                                .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> {
+                                }));
 
-        return http.build();
-    }
+                return http.build();
+        }
 }

@@ -1,0 +1,47 @@
+### Base URL: http://localhost:8080/api/v1
+
+### 1. Create a Resource
+POST {{base_url}}/resources
+Content-Type: application/json
+
+{
+  "name": "Sample Service",
+  "description": "A production-grade standard service"
+}
+
+### 2. Get All Resources (Default Pagination)
+GET {{base_url}}/resources?pageNumber=0&pageSize=10&sortBy=name&sortDirection=ASC
+
+### 3. Search Resources (Advanced Filtering)
+POST {{base_url}}/resources/search
+Content-Type: application/json
+
+{
+  "pageNumber": 0,
+  "pageSize": 10,
+  "sortBy": "createdAt",
+  "sortDirection": "DESC",
+  "filters": [
+    {
+      "column": "name",
+      "operator": "LIKE",
+      "value": "Sample"
+    }
+  ]
+}
+
+### 4. Advanced Filtering with Multiple Clauses
+POST {{base_url}}/resources/search
+Content-Type: application/json
+
+{
+  "pageNumber": 0,
+  "pageSize": 5,
+  "filters": [
+    {
+      "column": "name",
+      "operator": "EQUALS",
+      "value": "Sample Service"
+    }
+  ]
+}

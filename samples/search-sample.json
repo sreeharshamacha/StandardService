@@ -1,0 +1,13 @@
+{
+    "pageNumber": 0,
+    "pageSize": 10,
+    "sortBy": "id",
+    "sortDirection": "DESC",
+    "filters": [
+        {
+            "column": "name",
+            "operator": "LIKE",
+            "value": "test"
+        }
+    ]
+}
