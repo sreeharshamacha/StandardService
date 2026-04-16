@@ -13,19 +13,22 @@ spring:
   datasource:
     url: jdbc:mysql://localhost:3306/standard_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
     username: root
-    password: password
+    password: ${DB_PASSWORD:password}
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
-      maximum-pool-size: 10
+      maximum-pool-size: ${DB_POOL_MAX:10}
       minimum-idle: 5
       idle-timeout: 300000
       connection-timeout: 20000
       max-lifetime: 1200000
       pool-name: StandardHikariCP
 
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.sql
+    
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     show-sql: false
     properties:
       hibernate:
@@ -63,6 +66,8 @@ management:
   endpoint:
     health:
       show-details: always
+      probes:
+        enabled: true
     prometheus:
       enabled: true
   

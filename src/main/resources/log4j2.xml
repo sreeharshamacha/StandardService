@@ -2,13 +2,13 @@
 <Configuration status="WARN">
     <Appenders>
         <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - [%X{traceId}, %X{spanId}] - %msg%n"/>
+            <JsonTemplateLayout/>
         </Console>
         
         <!-- Optional: File appender for production -->
         <RollingFile name="RollingFile" fileName="logs/standard-service.log"
                      filePattern="logs/standard-service-%d{yyyy-MM-dd}-%i.log.gz">
-            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - [%X{traceId}, %X{spanId}] - %msg%n"/>
+            <JsonTemplateLayout/>
             <Policies>
                 <TimeBasedTriggeringPolicy />
                 <SizeBasedTriggeringPolicy size="10MB" />

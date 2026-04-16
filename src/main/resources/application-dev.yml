@@ -5,17 +5,19 @@ spring:
   datasource:
     url: jdbc:h2:mem:standard_db;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     username: sa
-    password: ""
+    password: ${DB_PASSWORD:password}
     driver-class-name: org.h2.Driver
-
-  h2:
-    console:
+    hikari:
+      maximum-pool-size: ${DB_POOL_MAX:10}
       enabled: true
       path: /h2-console
 
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.sql
+    
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     show-sql: false
     properties:
       hibernate:
@@ -53,6 +55,8 @@ management:
   endpoint:
     health:
       show-details: always
+      probes:
+        enabled: true
     prometheus:
       enabled: true
   
