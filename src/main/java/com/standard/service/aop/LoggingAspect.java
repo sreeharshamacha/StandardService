@@ -17,7 +17,8 @@ import java.util.Arrays;
 @Slf4j
 public class LoggingAspect {
 
-    @Pointcut("within(com.standard.service.controller..*) || within(com.standard.service.service..*)")
+    @Pointcut("execution(* com.standard.service.controller..*(..)) || "
+            + "execution(* com.standard.service.service..*(..)) || " + "execution(* com.standard.service.saga..*(..))")
     public void applicationPointcut() {
     }
 
