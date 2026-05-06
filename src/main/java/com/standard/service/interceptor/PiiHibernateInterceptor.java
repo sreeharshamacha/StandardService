@@ -9,7 +9,11 @@ import org.hibernate.Interceptor;
 import org.hibernate.type.Type;
 import org.springframework.stereotype.Component;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Component
@@ -18,6 +22,7 @@ public class PiiHibernateInterceptor implements Interceptor {
 
     private final PiiProperties piiProperties;
     private final EncryptionService encryptionService;
+    private final Map<String, Set<String>> cachedPiiFields = new ConcurrentHashMap<>();
 
     @Override
     public boolean onLoad(Object entity, Object id, Object[] state, String[] propertyNames, Type[] types)
@@ -42,7 +47,8 @@ public class PiiHibernateInterceptor implements Interceptor {
             return false;
         }
 
-        List<String> piiFields = piiProperties.getEntities().get(className);
+        Set<String> piiFields = cachedPiiFields.computeIfAbsent(className,
+                k -> new HashSet<>(piiProperties.getEntities().get(k)));
         boolean modified = false;
 
         for (int i = 0; i < propertyNames.length; i++) {
