@@ -58,6 +58,13 @@ public class PiiHibernateInterceptor implements Interceptor {
                     try {
                         if (isEncrypt) {
                             state[i] = encryptionService.encrypt(value);
+                            
+                            String hashFieldName = propertyNames[i] + "Hash";
+                            setHashState(propertyNames, state, hashFieldName, encryptionService.generateBlindIndex(value));
+                            
+                            String hashVersionFieldName = propertyNames[i] + "HashVersion";
+                            setHashState(propertyNames, state, hashVersionFieldName, piiProperties.getHashPepperVersion());
+                            
                             modified = true;
                         } else {
                             state[i] = encryptionService.decrypt(value);
@@ -70,5 +77,14 @@ public class PiiHibernateInterceptor implements Interceptor {
             }
         }
         return modified;
+    }
+
+    private void setHashState(String[] propertyNames, Object[] state, String hashFieldName, Object hashValue) {
+        for (int i = 0; i < propertyNames.length; i++) {
+            if (propertyNames[i].equals(hashFieldName)) {
+                state[i] = hashValue;
+                break;
+            }
+        }
     }
 }

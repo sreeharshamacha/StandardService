@@ -1,5 +1,7 @@
 pii:
   encryption-key: ${PII_SECRET_KEY:ThisIsA32ByteLongSecureKey123456}
+  hash-pepper-version: 1
+  hash-pepper: ${PII_HASH_PEPPER:ThisIsA32ByteLongSecurePepper123}
   entities:
     com.standard.service.entity.UserEntity: 
       - email

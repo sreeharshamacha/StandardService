@@ -27,3 +27,11 @@ CREATE TABLE IF NOT EXISTS resources (
     version BIGINT,
     is_active BOOLEAN DEFAULT TRUE
 );
+
+-- changeset system:4
+ALTER TABLE users ADD COLUMN email_hash CHAR(44);
+ALTER TABLE users ADD COLUMN email_hash_version INT;
+ALTER TABLE users ADD COLUMN national_id_hash CHAR(44);
+ALTER TABLE users ADD COLUMN national_id_hash_version INT;
+CREATE INDEX idx_user_email_hash ON users(email_hash);
+CREATE INDEX idx_user_national_id_hash ON users(national_id_hash);

@@ -20,4 +20,13 @@ public class UserEntity {
     // PII fields mapped globally via YAML
     private String email;
     private String nationalId;
+
+    // Blind Index Hash fields for searching
+    @jakarta.persistence.Column(columnDefinition = "CHAR(44)")
+    private String emailHash;
+    private Integer emailHashVersion;
+    
+    @jakarta.persistence.Column(columnDefinition = "CHAR(44)")
+    private String nationalIdHash;
+    private Integer nationalIdHashVersion;
 }

@@ -12,5 +12,7 @@ import java.util.Map;
 @ConfigurationProperties(prefix = "pii")
 public class PiiProperties {
     private String encryptionKey;
+    private int hashPepperVersion = 1;
+    private String hashPepper;
     private Map<String, List<String>> entities;
 }

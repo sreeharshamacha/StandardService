@@ -4,12 +4,14 @@ import com.standard.service.config.PiiProperties;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.Cipher;
+import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.Base64;
+import java.util.Locale;
 
 @Component
 public class EncryptionService {
@@ -17,6 +19,8 @@ public class EncryptionService {
     private static final int GCM_TAG_LENGTH = 128;
     private static final int IV_LENGTH = 12;
     private final SecretKey key;
+    private final String hashPepper;
+    private final int hashPepperVersion;
 
     public EncryptionService(PiiProperties properties) {
         String secretKeyStr = properties.getEncryptionKey();
@@ -24,6 +28,9 @@ public class EncryptionService {
             secretKeyStr = "Default32ByteLongSecureKey123456";
         }
         this.key = new SecretKeySpec(secretKeyStr.substring(0, 32).getBytes(StandardCharsets.UTF_8), "AES");
+        
+        this.hashPepper = properties.getHashPepper() != null ? properties.getHashPepper() : "Default32ByteLongSecurePepper123";
+        this.hashPepperVersion = properties.getHashPepperVersion() > 0 ? properties.getHashPepperVersion() : 1;
     }
 
     public String encrypt(String raw) {
@@ -72,5 +79,35 @@ public class EncryptionService {
         } catch (Exception e) {
             return encryptedBase64;
         }
+    }
+
+    public String generateBlindIndex(String raw) {
+        if (raw == null || raw.isBlank()) return null;
+        
+        String normalized = raw.trim().toLowerCase(Locale.ROOT);
+        try {
+            byte[] derivedKey = deriveKeyWithHKDF(this.hashPepper.getBytes(StandardCharsets.UTF_8));
+            Mac mac = Mac.getInstance("HmacSHA256");
+            SecretKeySpec secretKeySpec = new SecretKeySpec(derivedKey, "HmacSHA256");
+            mac.init(secretKeySpec);
+            
+            byte[] hash = mac.doFinal(normalized.getBytes(StandardCharsets.UTF_8));
+            return Base64.getEncoder().encodeToString(hash);
+        } catch (Exception e) {
+            throw new RuntimeException("HMAC hashing failed", e);
+        }
+    }
+
+    private byte[] deriveKeyWithHKDF(byte[] ikm) throws Exception {
+        Mac extractMac = Mac.getInstance("HmacSHA256");
+        byte[] salt = new byte[32]; // Standard zero salt
+        extractMac.init(new SecretKeySpec(salt, "HmacSHA256"));
+        byte[] prk = extractMac.doFinal(ikm);
+
+        Mac expandMac = Mac.getInstance("HmacSHA256");
+        expandMac.init(new SecretKeySpec(prk, "HmacSHA256"));
+        expandMac.update("blind-index".getBytes(StandardCharsets.UTF_8));
+        expandMac.update((byte) 1);
+        return expandMac.doFinal();
     }
 }
