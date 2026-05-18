@@ -38,6 +38,9 @@ class PiiEncryptionIntegrationTest {
         assertEquals("SSN-123-456", retrievedUser.getNationalId());
 
         // Verify underlying database physically contains Ciphertext via raw JDBC
+        // NOTE: This native query approach is strictly for NEGATIVE TESTING / VALIDATION purposes only.
+        // It is used to prove the data is encrypted on disk. In actual application use cases, 
+        // you should ONLY use JPA repositories (which will handle decryption transparently).
         List<Map<String, Object>> rows = jdbcTemplate.queryForList("SELECT * FROM users WHERE id = ?", user.getId());
         assertEquals(1, rows.size());
 
