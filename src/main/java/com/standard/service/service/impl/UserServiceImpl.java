@@ -4,6 +4,7 @@ import com.standard.service.dto.UserDto;
 import com.standard.service.entity.UserEntity;
 import com.standard.service.repository.UserRepository;
 import com.standard.service.service.UserService;
+import com.standard.service.utils.EncryptionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.Optional;
@@ -13,6 +14,7 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final EncryptionService encryptionService;
 
     @Override
     public UserDto createUser(UserDto userDto) {
@@ -23,7 +25,12 @@ public class UserServiceImpl implements UserService {
 
         UserEntity saved = userRepository.save(entity);
 
-        return mapToDto(saved);
+        UserDto result = mapToDto(saved);
+        // Ensure the returned DTO has the plaintext values (transparent to the client),
+        // as the saved entity in Hibernate L1 cache may retain the encrypted state from onSave.
+        result.setEmail(userDto.getEmail());
+        result.setNationalId(userDto.getNationalId());
+        return result;
     }
 
     @Override
@@ -33,8 +40,20 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Optional<UserDto> getUserByEmail(String email) {
-        // Not implemented in repository by default. Requires searching by emailHash.
-        return Optional.empty(); 
+        if (email == null || email.isBlank()) {
+            return Optional.empty();
+        }
+        String emailHash = encryptionService.generateBlindIndex(email);
+        return userRepository.findByEmailHash(emailHash).map(this::mapToDto);
+    }
+
+    @Override
+    public Optional<UserDto> getUserByNationalId(String nationalId) {
+        if (nationalId == null || nationalId.isBlank()) {
+            return Optional.empty();
+        }
+        String nationalIdHash = encryptionService.generateBlindIndex(nationalId);
+        return userRepository.findByNationalIdHash(nationalIdHash).map(this::mapToDto);
     }
 
     private UserDto mapToDto(UserEntity entity) {

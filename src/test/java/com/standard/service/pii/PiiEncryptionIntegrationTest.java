@@ -2,6 +2,8 @@ package com.standard.service.pii;
 
 import com.standard.service.entity.UserEntity;
 import com.standard.service.repository.UserRepository;
+import com.standard.service.service.UserService;
+import com.standard.service.dto.UserDto;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -17,6 +19,9 @@ class PiiEncryptionIntegrationTest {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private UserService userService;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -54,5 +59,37 @@ class PiiEncryptionIntegrationTest {
 
         assertNotNull(dbNationalId);
         assertNotEquals("SSN-123-456", dbNationalId, "National ID must be encrypted in database");
+    }
+
+    @Test
+    void testSearchByEncryptedFields() {
+        // Given
+        UserDto userDto = UserDto.builder()
+                .name("Jane Smith")
+                .email("jane.smith@example.com")
+                .nationalId("SSN-987-654")
+                .build();
+
+        // When saved
+        UserDto saved = userService.createUser(userDto);
+        assertNotNull(saved.getId());
+
+        // Then search by email
+        UserDto foundByEmail = userService.getUserByEmail("jane.smith@example.com").orElse(null);
+        assertNotNull(foundByEmail);
+        assertEquals("Jane Smith", foundByEmail.getName());
+        assertEquals("jane.smith@example.com", foundByEmail.getEmail());
+        assertEquals("SSN-987-654", foundByEmail.getNationalId());
+
+        // Then search by national ID
+        UserDto foundByNationalId = userService.getUserByNationalId("SSN-987-654").orElse(null);
+        assertNotNull(foundByNationalId);
+        assertEquals("Jane Smith", foundByNationalId.getName());
+        assertEquals("jane.smith@example.com", foundByNationalId.getEmail());
+        assertEquals("SSN-987-654", foundByNationalId.getNationalId());
+
+        // Then search by non-existent values
+        assertTrue(userService.getUserByEmail("notfound@example.com").isEmpty());
+        assertTrue(userService.getUserByNationalId("SSN-000-000").isEmpty());
     }
 }

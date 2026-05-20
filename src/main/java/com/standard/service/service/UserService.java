@@ -7,4 +7,5 @@ public interface UserService {
     UserDto createUser(UserDto userDto);
     Optional<UserDto> getUserById(Long id);
     Optional<UserDto> getUserByEmail(String email);
+    Optional<UserDto> getUserByNationalId(String nationalId);
 }

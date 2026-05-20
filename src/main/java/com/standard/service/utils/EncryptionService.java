@@ -28,8 +28,9 @@ public class EncryptionService {
             secretKeyStr = "Default32ByteLongSecureKey123456";
         }
         this.key = new SecretKeySpec(secretKeyStr.substring(0, 32).getBytes(StandardCharsets.UTF_8), "AES");
-        
-        this.hashPepper = properties.getHashPepper() != null ? properties.getHashPepper() : "Default32ByteLongSecurePepper123";
+
+        this.hashPepper = properties.getHashPepper() != null ? properties.getHashPepper()
+                : "Default32ByteLongSecurePepper123";
         this.hashPepperVersion = properties.getHashPepperVersion() > 0 ? properties.getHashPepperVersion() : 1;
     }
 
@@ -82,15 +83,16 @@ public class EncryptionService {
     }
 
     public String generateBlindIndex(String raw) {
-        if (raw == null || raw.isBlank()) return null;
-        
+        if (raw == null || raw.isBlank())
+            return null;
+
         String normalized = raw.trim().toLowerCase(Locale.ROOT);
         try {
             byte[] derivedKey = deriveKeyWithHKDF(this.hashPepper.getBytes(StandardCharsets.UTF_8));
             Mac mac = Mac.getInstance("HmacSHA256");
             SecretKeySpec secretKeySpec = new SecretKeySpec(derivedKey, "HmacSHA256");
             mac.init(secretKeySpec);
-            
+
             byte[] hash = mac.doFinal(normalized.getBytes(StandardCharsets.UTF_8));
             return Base64.getEncoder().encodeToString(hash);
         } catch (Exception e) {
